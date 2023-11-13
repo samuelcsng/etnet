@@ -11,7 +11,7 @@ cat("\014")
 
 # scrape page -------------------------------------------------------------
 
-scrape_page <- 10
+scrape_page <- 25
 etnet_news_tbl <- tibble()
 
 # first page --------------------------------------------------------------
@@ -27,14 +27,14 @@ datetime_list <- containers %>%
    html_elements(css = ".date") %>% html_text2() %>% dmy_hm()
 
 newsheader_list <- containers %>% 
-   html_elements(css = "a") %>% html_text2() %>% .[c(-2)]
-   #html_elements(css = "a") %>% html_text2() %>% .[c(-2,-4)]
+   #html_elements(css = "a") %>% html_text2() %>% .[c(-2)]
+   html_elements(css = "a") %>% html_text2() %>% .[c(-2,-4)]
    #html_elements(css = "a") %>% html_text2() #%>% .[c()]
    #html_elements(css = "a") %>% .[1] %>% html_text2() #%>% .[c(-2,-4)]
 
 newslink_list <- containers %>% 
-   html_elements(css = "a") %>% html_attr("href") %>% .[c(-2)]
-   #html_elements(css = "a") %>% html_attr("href") %>% .[c(-2,-4)]
+   #html_elements(css = "a") %>% html_attr("href") %>% .[c(-2)]
+   html_elements(css = "a") %>% html_attr("href") %>% .[c(-2,-4)]
    #html_elements(css = "a") %>% html_attr("href") #%>% .[c()]
    #html_elements(css = "a") %>% .[1] %>% html_attr("href") #%>% .[c(-2,-4)]
 

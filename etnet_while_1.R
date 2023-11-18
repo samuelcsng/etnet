@@ -135,22 +135,22 @@ while (1) {
 
    hsi_record <- hsi_record_html %>%
       html_element(css =".FuturesQuoteNominal2") %>% html_text2() %>%
-      parse_number() %>% floor()
+      parse_number() %>% trunc() #%>% floor()
    hsi_c <- hsi_record_html %>% 
       html_element(css = ".FuturesQuoteBlock .FuturesQuoteOthers") %>% html_text2()%>% 
-      str_split("O") %>% .[[1]] %>% .[1] %>% parse_number() %>% floor()
+      str_split("O") %>% .[[1]] %>% .[1] %>% parse_number() %>% trunc() #%>% floor()
    hsi_o <- hsi_record_html %>% 
       html_element(css = ".FuturesQuoteBlock .FuturesQuoteOthers") %>% html_text2()%>% 
-      str_split("O") %>% .[[1]] %>% .[2] %>% parse_number() %>% floor()
+      str_split("O") %>% .[[1]] %>% .[2] %>% parse_number() %>% trunc() #%>% floor()
    hsi_h <- hsi_record_html %>% 
       html_element(css =".FuturesQuoteBlock .FuturesQuoteOthers") %>% html_text2() %>% 
-      str_split("/") %>% .[[1]] %>% .[2] %>% parse_number() %>% floor()
+      str_split("/") %>% .[[1]] %>% .[2] %>% parse_number() %>% trunc() #%>% floor()
    hsi_l <- hsi_record_html %>% 
       html_element(css =".FuturesQuoteBlock .FuturesQuoteOthers") %>% html_text2() %>% 
-      str_split("/") %>% .[[1]] %>% .[3] %>% parse_number() %>% floor()
+      str_split("/") %>% .[[1]] %>% .[3] %>% parse_number() %>% trunc() #%>% floor()
    hsi_r <- hsi_h - hsi_l
    hsi_pg <- ( (hsi_record - hsi_l) / hsi_r ) |> round(3)
-   hsi_pg_list <- ( hsi_l + hsi_r * pg_ratios ) %>% floor() #%>% round(2)
+   hsi_pg_list <- ( hsi_l + hsi_r * pg_ratios ) %>% trunc() #%>% floor() #%>% round(2)
    
    hsi_tbl <- tibble(
      session = "hsi",

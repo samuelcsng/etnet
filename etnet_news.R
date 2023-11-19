@@ -40,4 +40,3 @@ etnet_news_tbl <- etnet_news_tbl %>% mutate(
  link = xml2::url_absolute(link, "https://www.etnet.com.hk/www/tc/news/")
 )
 View(etnet_news_tbl %>% select(-c("link"))) #%>% View()
-#View(etnet_news_tbl) %>% select(-c("link"))

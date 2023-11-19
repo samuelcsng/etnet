@@ -23,6 +23,7 @@ while (1) {
    #now <- force_tz(now(), tzone = "hongkong")
    
    html<-read_html(url)
+   Sys.sleep(1)
    
    containers <- html %>% html_elements(css = ".FuturesQuoteContent")
    hsif_regular_record_html <- containers[[1]]
@@ -199,11 +200,20 @@ while (1) {
    
    n <- n + 1
    if (n >= 20) {
-      cat("\n")
-      reference_tbl %>% print(n = Inf)
-      cat("\n")
-      # read 15min analysis
-      n <- 0
+     
+     if ( (now >= "09:15:00") & (now < "17:15:00") ) {
+       cat("\n")
+       # read 15min analysis
+       source("etnet.R")
+     } else {
+       source("etnet_2.R")
+     }
+       
+     cat("\n")
+     reference_tbl %>% print(n = Inf)
+     
+     cat("\n")
+     n <- 0
    }
    
    #cat(if_else(n >= 10, "", " "), n, " ", today, " ", now, " : ", hsif_record, " ", hsif_pg, " ( - ", hsi_record, " = ", round(hsif_record - hsi_record), " )", " --- ",
@@ -233,6 +243,7 @@ while (1) {
    
    last_record <- hsif_record
    
-   Sys.sleep(14.5)   
+   #Sys.sleep(14.5)   
+   Sys.sleep(13.5)
    #beep()
 }

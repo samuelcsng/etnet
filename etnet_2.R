@@ -4,6 +4,7 @@ library(stringr)
 library(rvest)
 
 hkf_month <- 202311
+if (0) {
 #url<-paste("http://www.etnet.com.hk/www/eng/futures/index.php?subtype=HSI&month=", hkf_month, "&tab=interval#tab",sep="")
 #html<-read_html(url)
 table_list<-
@@ -33,8 +34,8 @@ etnet_df1<-
 rownames(etnet_df1)<-NULL
 #View(etnet_df1)
 bind_rows(etnet_df1, etnet_df1[c(2,1),])[-c(1, 2),] %>% as_tibble() %>%  print(n=Inf)
+}
 
-if (0) {
 url<-paste("http://www.etnet.com.hk/www/eng/futures/index.php?subtype=HSI&month=", hkf_month, "&tab=data#tab",sep="")
 html<-read_html(url)
 table_list<-
@@ -48,7 +49,7 @@ etnet_df2<-
    data.frame()%>%
    .[c(2:3),]%>%
    transmute(
-      Date=tradeday,
+      #Date=tradeday,
       Session=str_replace_all(X1," Futures Volume",""),
       Volume=as.numeric(str_replace_all(X2,",","")),
       Tic=as.numeric(str_replace_all(X4,",","")),
@@ -56,9 +57,10 @@ etnet_df2<-
    )
 rownames(etnet_df2)<-NULL
 #View(etnet_df2)
+cat("\n")
+etnet_df2 %>% as_tibble() %>% print()
 
-
-
+cat("\n")
 etnet_df3<-
    table_list%>%
    .[1]%>%
@@ -66,16 +68,17 @@ etnet_df3<-
    data.frame()%>%
    .[4,]%>%
    transmute(
-      Date=tradeday,
+      #Date=tradeday,
       GOI=as.numeric(str_replace_all(X2,",","")),
       NOI=as.numeric(str_replace_all(X4,",","")),
       "Expiry Date"=X6
    )
 rownames(etnet_df3)<-NULL
 #View(etnet_df3)
+etnet_df3 %>% as_tibble() %>%  print()
 
-
-
+if (0) {
+  
 #url<-paste("http://www.etnet.com.hk/www/eng/futures/index.php?subtype=HSI&month=", hkf_month, "&tab=data#tab",sep="")
 url<-"http://www.etnet.com.hk/www/eng/stocks/indexes_detail.php?subtype=HSI&column=1"
 html<-read_html(url)

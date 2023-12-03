@@ -8,11 +8,11 @@ options(width=270)
 
 #cat("\014")
 
-hkf_month <- 202311
+hkf_month <- 202312
 url<-paste("http://www.etnet.com.hk/www/eng/futures/index.php?subtype=HSI&month=", hkf_month, "&tab=interval#tab",sep="")
 
 reference_list <- c()
-last_record <- 17293 #17156 #17260
+last_record <- 17447 #17425 #17156 #17260
 
 n <- 19
 pg_ratios <- c(0, 0.1, 1/8, 1/6, 0.2, 0.25, 0.3, 1/3, 0.4, 0.5, 0.6, 2/3, 0.7, 0.75, 0.8, 5/6, 7/8, 0.9, 1)
@@ -35,6 +35,10 @@ while (1) {
    hsif_regular_record <- hsif_regular_record_html %>%
       html_element(css = ".FuturesQuoteNominal") %>% html_text2() %>%
       parse_number() %>% as.integer()
+   hsif_regular_changed <- hsif_regular_record_html %>%
+     html_element(css = ".FuturesQuoteChanged") %>% html_text2() %>%
+     parse_number() #%>% as.integer()
+   # hsif_regular_changed %>% print()
    regular_c <- hsif_regular_record_html %>% 
       html_element(css =".FuturesQuoteBlock .FuturesQuoteOthers") %>% html_text2() %>% 
       str_split("O") %>% .[[1]] %>% .[1] %>% parse_number()
@@ -55,6 +59,8 @@ while (1) {
       session = "regular",
       c = regular_c,
       o = regular_o,
+      l = hsif_regular_record,
+      chg = hsif_regular_changed,
       r = regular_r,
       `0.00` = regular_pg_list[1],
       `0.10` = regular_pg_list[2],
@@ -84,6 +90,10 @@ while (1) {
    hsif_at_record      <- hsif_at_record_html %>% 
       html_element(css = ".FuturesQuoteNominal") %>% html_text2() %>% 
       parse_number() %>% as.integer()
+   hsif_at_changed <- hsif_at_record_html %>%
+     html_element(css = ".FuturesQuoteChanged") %>% html_text2() %>%
+     parse_number() #%>% as.integer()
+   # hsif_at_changed %>% print()
    at_c <- hsif_at_record_html %>% 
       html_element(css =".FuturesQuoteBlock .FuturesQuoteOthers") %>% html_text2() %>% 
       str_split("O") %>% .[[1]] %>% .[1] %>% parse_number()
@@ -104,6 +114,8 @@ while (1) {
       session = "at",
       c = at_c,
       o = at_o,
+      l = hsif_at_record,
+      chg = hsif_at_changed,
       r = at_r,
       `0.00` = at_pg_list[1],
       `0.10` = at_pg_list[2],
@@ -137,7 +149,11 @@ while (1) {
    hsi_record <- hsi_record_html %>%
       html_element(css =".FuturesQuoteNominal2") %>% html_text2() %>%
       parse_number() %>% trunc() #%>% floor()
-   hsi_c <- hsi_record_html %>% 
+   hsi_changed <- hsi_record_html %>%
+     html_element(css = ".FuturesQuoteChanged") %>% html_text2() %>%
+     parse_number() #%>% round(2) #%>% as.integer()
+   # hsi_changed %>% is.double()%>% print()
+   hsi_c <- hsi_record_html %>%
       html_element(css = ".FuturesQuoteBlock .FuturesQuoteOthers") %>% html_text2()%>% 
       str_split("O") %>% .[[1]] %>% .[1] %>% parse_number() %>% trunc() #%>% floor()
    hsi_o <- hsi_record_html %>% 
@@ -157,6 +173,8 @@ while (1) {
      session = "hsi",
      c = hsi_c,
      o = hsi_o,
+     l = hsi_record,
+     chg = hsi_changed,
      r = hsi_r,
      `0.00` = hsi_pg_list[1],
      `0.10` = hsi_pg_list[2],
@@ -190,10 +208,16 @@ while (1) {
 
    if ( (now >= "09:15:00") & (now < "17:15:00") ) {
       hsif_record <- hsif_regular_record
+      hsif_high <- regular_h
+      hsif_low <- regular_l
+      hsif_changed <- hsif_regular_changed
       hsif_references <- regular_references %>% unique() %>% sort()
       hsif_pg <- regular_pg
    } else {
       hsif_record <- hsif_at_record
+      hsif_high <- at_h
+      hsif_low <- at_l
+      hsif_changed <- hsif_at_changed
       hsif_references <- c(regular_references, at_references) %>% unique() %>% sort()
       hsif_pg <- at_pg
    }
@@ -217,10 +241,11 @@ while (1) {
    }
    
    #cat(if_else(n >= 10, "", " "), n, " ", today, " ", now, " : ", hsif_record, " ", hsif_pg, " ( - ", hsi_record, " = ", round(hsif_record - hsi_record), " )", " --- ",
+   if (0) {
    cat(if_else(n >= 10, "", " "), n, " ",
        today, " ", now, " : ",
-       "(", hsi_record, ", ", hsi_pg, ")", " ",
-       "(", hsif_record, ", ", hsif_pg, ", ", round(hsif_record - hsi_record), ")", 
+       "(", hsi_record, ", ", hsi_changed, ", ", hsi_pg, ")", " ",
+       "(", hsif_record, ", ", hsif_changed, ", ", hsif_pg, ", ", round(hsif_record - hsi_record), ")", 
        " --- ",
       case_when(
           hsif_record > last_record ~ "UP",
@@ -228,6 +253,20 @@ while (1) {
           .default = ""
        ),
        sep = "")
+   }
+   print_message <-
+     str_glue(
+       '{if_else(n >= 10, "", " ")}{n} {today} {now} : ',
+       '({hsi_record}, {hsi_changed}, {hsi_l}, {hsi_h}, {hsi_pg}) ',
+       '({hsif_record}, {hsif_changed}, {hsif_low}, {hsif_high}, {hsif_pg}, {round(hsif_record - hsi_record)}) ',
+       '--- ',
+       '{case_when(
+            hsif_record > last_record ~ "UP",
+            hsif_record < last_record ~ "DN",
+            .default = ""
+         )}'
+     )
+   cat(print_message)
    
    beep_up <- FALSE
    beep_dn <- FALSE
@@ -236,7 +275,7 @@ while (1) {
      if ( (last_record >= reference) & (hsif_record < reference) ) { cat(" ", reference, sep = ""); beep_dn <- TRUE } #beep(11)} # beep(2) beep(9) beep(11)
      
    }
-   if (beep_up) beep(7)
+   if (beep_up) beep(5) #beep(7)
    if (beep_dn) beep(11)
    
    cat("\n")

@@ -7,12 +7,14 @@ library(beepr)
 options(width=270)
 
 #cat("\014")
+source("volatility_function.R")
 
 hkf_month <- 202312
 url<-paste("http://www.etnet.com.hk/www/eng/futures/index.php?subtype=HSI&month=", hkf_month, "&tab=interval#tab",sep="")
 
 reference_list <- c()
 last_record <- 17447 #17425 #17156 #17260
+vol_last_record <- 20
 
 n <- 19
 pg_ratios <- c(0, 0.1, 1/8, 1/6, 0.2, 0.25, 0.3, 1/3, 0.4, 0.5, 0.6, 2/3, 0.7, 0.75, 0.8, 5/6, 7/8, 0.9, 1)
@@ -203,6 +205,10 @@ while (1) {
    #cat(at_c, at_o, at_h, at_l, hsif_at_record, "\n", sep = " ")
    #cat(hsi_c, hsi_o, hsi_h, hsi_l, hsi_record, "\n", sep = " ")
 
+# volatility --------------------------------------------------------------
+
+# source("volatility_function.R")
+volatility <- volatility_fun()
 
 # presentation ------------------------------------------------------------
 
@@ -221,6 +227,17 @@ while (1) {
       hsif_references <- c(regular_references, at_references) %>% unique() %>% sort()
       hsif_pg <- at_pg
    }
+
+vol_record<- volatility[1,2]
+vol_high<-volatility[1,7]
+vol_low<-volatility[1,8]
+vol_changed<-volatility[1,3]
+vol_pg<-volatility[1,10]
+vol_updn<-case_when(
+  vol_record > vol_last_record ~ "UP",
+  vol_record < vol_last_record ~ "DN",
+  .default = "--"
+)
    
    n <- n + 1
    if (n >= 20) {
@@ -235,7 +252,8 @@ while (1) {
        
      cat("\n")
      reference_tbl %>% print(n = Inf)
-     
+     cat("\n")
+     volatility %>% print(n=Inf)
      cat("\n")
      n <- 0
    }
@@ -259,6 +277,7 @@ while (1) {
        '{if_else(n >= 10, "", " ")}{n} {today} {now} : ',
        '({hsi_record}, {hsi_changed}, {hsi_l}, {hsi_h}, {hsi_pg}) ',
        '({hsif_record}, {hsif_changed}, {hsif_low}, {hsif_high}, {hsif_pg}, {round(hsif_record - hsi_record)}) ',
+       '({vol_record}{vol_updn}, {vol_changed}, {vol_low}, {vol_high}, {vol_pg}) ',
        '--- ',
        '{case_when(
             hsif_record > last_record ~ "UP",
@@ -281,8 +300,9 @@ while (1) {
    cat("\n")
    
    last_record <- hsif_record
-   
+   vol_last_record<-vol_record
    #Sys.sleep(14.5)   
-   Sys.sleep(13.5)
+   #Sys.sleep(13.5)
+   Sys.sleep(12.5)
    #beep()
 }

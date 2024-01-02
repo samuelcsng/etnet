@@ -9,7 +9,7 @@ options(width=270)
 #cat("\014")
 source("volatility_function.R")
 
-hkf_month <- 202312
+hkf_month <- 202401 #202312
 url<-paste("http://www.etnet.com.hk/www/eng/futures/index.php?subtype=HSI&month=", hkf_month, "&tab=interval#tab",sep="")
 
 reference_list <- c()
@@ -228,10 +228,10 @@ volatility <- volatility_fun()
       hsif_pg <- at_pg
    }
 
-vol_record<- volatility[1,2]
-vol_high<-volatility[1,7]
-vol_low<-volatility[1,8]
-vol_changed<-volatility[1,3]
+vol_record<- volatility[1,6]
+vol_high<-volatility[1,4]
+vol_low<-volatility[1,5]
+vol_changed<-volatility[1,7]
 vol_pg<-volatility[1,10]
 vol_updn<-case_when(
   vol_record > vol_last_record ~ "UP",
@@ -249,8 +249,10 @@ vol_updn<-case_when(
      } else {
        source("etnet_2.R")
      }
-       
+     
      cat("\n")
+     cat(hkf_month,"\n")
+     #cat("\n")
      reference_tbl %>% print(n = Inf)
      cat("\n")
      volatility %>% print(n=Inf)
@@ -275,9 +277,9 @@ vol_updn<-case_when(
    print_message <-
      str_glue(
        '{if_else(n >= 10, "", " ")}{n} {today} {now} : ',
-       '({hsi_record}, {hsi_changed}, {hsi_l}, {hsi_h}, {hsi_pg}) ',
-       '({hsif_record}, {hsif_changed}, {hsif_low}, {hsif_high}, {hsif_pg}, {round(hsif_record - hsi_record)}) ',
-       '({vol_record}{vol_updn}, {vol_changed}, {vol_low}, {vol_high}, {vol_pg}) ',
+       '({hsi_h}, {hsi_l}, {hsi_record}, {hsi_changed}, {hsi_pg}) ',
+       '({hsif_high}, {hsif_low}, {hsif_record}, {hsif_changed}, {round(hsif_record - hsi_record)}, {hsif_pg}) ',
+       '({vol_high}, {vol_low}, {vol_record} {vol_updn}, {vol_changed}, {vol_pg}) ',
        '--- ',
        '{case_when(
             hsif_record > last_record ~ "UP",

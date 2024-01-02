@@ -24,16 +24,18 @@ volatility_fun <- function(){
   volatility <- volatility %>% select(1:8) %>% .[-1, ]
   volatility <- volatility %>%
     mutate(
-      last = as.numeric(last),
-      change = as.numeric(change),
-      pctChange = parse_number(pctChange),
       prvCls = as.numeric(prvCls),
       Open = as.numeric(Open),
       High = as.numeric(High),
       Low = as.numeric(Low),
+      last = as.numeric(last),
+      change = as.numeric(change),
+      pctChange = parse_number(pctChange),
       r = (High - Low)|> round(2),
       PG = ((last - Low) / r) |> round(2)
-    )
+    ) %>% 
+    select(index, prvCls, Open, High, Low, last, change, pctChange, r, PG)
+  
   return(volatility)
 }
 

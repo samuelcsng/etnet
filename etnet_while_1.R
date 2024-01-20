@@ -240,7 +240,9 @@ vol_updn<-case_when(
 )
    
    n <- n + 1
-   if (n >= 20) {
+   N <- if_else((now >= "09:15:00") & (now < "10:30:00"), 4, 20)
+   if (n >= N) {
+#   if (n >= 20) {
      
      if ( (now >= "09:15:00") & (now < "17:15:00") ) {
        cat("\n")
@@ -277,9 +279,9 @@ vol_updn<-case_when(
    print_message <-
      str_glue(
        '{if_else(n >= 10, "", " ")}{n} {today} {now} : ',
-       '({hsi_h}, {hsi_l}, {hsi_record}, {hsi_changed}, {hsi_pg}) ',
-       '({hsif_high}, {hsif_low}, {hsif_record}, {hsif_changed}, {round(hsif_record - hsi_record)}, {hsif_pg}) ',
-       '({vol_high}, {vol_low}, {vol_record} {vol_updn}, {vol_changed}, {vol_pg}) ',
+       '(H{hsi_h} L{hsi_l} C{hsi_record} {if_else(hsi_changed>0, "+", "")}{hsi_changed} {hsi_pg}) ',
+       '(H{hsif_high} L{hsif_low} C{hsif_record} {if_else(hsif_changed>0, "+", "")}{hsif_changed} P{round(hsif_record - hsi_record)} {hsif_pg}) ',
+       '(H{vol_high} L{vol_low} C{vol_record} {vol_updn} {if_else(vol_changed>0, "+", "")}{vol_changed} {vol_pg}) ',
        '--- ',
        '{case_when(
             hsif_record > last_record ~ "UP",
